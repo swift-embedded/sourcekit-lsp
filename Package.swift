@@ -201,7 +201,7 @@ if getenv("SWIFTCI_USE_LOCAL_DEPS") == nil {
   // Building standalone.
   package.dependencies += [
     .package(url: "https://github.com/apple/indexstore-db.git", .branch("swift-5.2-branch")),
-    .package(url: "https://github.com/apple/swift-package-manager.git", .branch("swift-5.2-branch")),
+    .package(url: "https://github.com/swift-embedded/swift-package-manager.git", .branch("embedded-5.2")),
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .branch("swift-5.2-branch")),
   ]
 } else {
