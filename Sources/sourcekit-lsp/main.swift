@@ -20,6 +20,7 @@ import Dispatch
 import Basic
 import SPMUtility
 import Foundation
+import Workspace
 import sourcekitd // Not needed here, but fixes debugging...
 
 func parseArguments() throws -> BuildSetup {
@@ -28,6 +29,7 @@ func parseArguments() throws -> BuildSetup {
   let loggingOption = parser.add(option: "--log-level", kind: LogLevel.self, usage: "Set the logging level (debug|info|warning|error) [default: \(LogLevel.default)]")
   let buildConfigurationOption = parser.add(option: "--configuration", shortName: "-c", kind: BuildConfiguration.self, usage: "Build with configuration (debug|release) [default: debug]")
   let buildPathOption = parser.add(option: "--build-path", kind: PathArgument.self, usage: "Specify build/cache directory")
+  let destinationOption = parser.add(option: "--destination", kind: PathArgument.self)
   let buildFlagsCc = parser.add(option: "-Xcc", kind: [String].self, strategy: .oneByOne, usage: "Pass flag through to all C compiler invocations")
   let buildFlagsCxx = parser.add(option: "-Xcxx", kind: [String].self, strategy: .oneByOne, usage: "Pass flag through to all C++ compiler invocations")
   let buildFlagsLinker = parser.add(option: "-Xlinker", kind: [String].self, strategy: .oneByOne, usage: "Pass flag through to all linker invocations")
@@ -41,6 +43,10 @@ func parseArguments() throws -> BuildSetup {
   buildFlags.linkerFlags = parsedArguments.get(buildFlagsLinker) ?? []
   buildFlags.swiftCompilerFlags = parsedArguments.get(buildFlagsSwift) ?? []
 
+  let customDestination = try parsedArguments.get(destinationOption).map {
+    return try Destination(fromFile: $0.path)
+  }
+
   if let logLevel = parsedArguments.get(loggingOption) {
     Logger.shared.currentLevel = logLevel
   } else {
@@ -50,7 +56,8 @@ func parseArguments() throws -> BuildSetup {
   return BuildSetup(
     configuration: parsedArguments.get(buildConfigurationOption) ?? BuildSetup.default.configuration,
     path: parsedArguments.get(buildPathOption)?.path,
-    flags: buildFlags)
+    flags: buildFlags,
+    customDestination: customDestination)
 }
 
 let clientConnection = JSONRPCConection(inFD: STDIN_FILENO, outFD: STDOUT_FILENO, closeHandler: {

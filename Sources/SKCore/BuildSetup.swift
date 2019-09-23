@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 import Basic
+import Workspace
 import SPMUtility
 import SKSupport
 
@@ -31,9 +32,13 @@ public struct BuildSetup {
   /// Additional build flags
   public let flags: BuildFlags
 
-  public init(configuration: BuildConfiguration, path: AbsolutePath?, flags: BuildFlags) {
+  /// Custom compilation destination, if different from host
+  public let customDestination: Destination?
+
+  public init(configuration: BuildConfiguration, path: AbsolutePath?, flags: BuildFlags, customDestination: Destination? = nil) {
     self.configuration = configuration
     self.path = path
     self.flags = flags
+    self.customDestination = customDestination
   }
 }

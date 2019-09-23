@@ -73,21 +73,22 @@ public final class SwiftPMWorkspace {
         throw Error.cannotDetermineHostToolchain
     }
 
-    let destination = try Destination.hostDestination(destinationToolchainBinDir)
-    let toolchain = try UserToolchain(destination: destination)
+    let hostDestination = try Destination.hostDestination(destinationToolchainBinDir)
+    let manifestToolchain = try UserToolchain(destination: hostDestination)
+    let targetDestination = buildSetup.customDestination ?? hostDestination
+    let targetToolchain = try UserToolchain(destination: targetDestination)
 
     let buildPath: AbsolutePath = buildSetup.path ?? packageRoot.appending(component: ".build")
+
 
     self.workspace = Workspace(
       dataPath: buildPath,
       editablesPath: packageRoot.appending(component: "Packages"),
       pinsFile: packageRoot.appending(component: "Package.resolved"),
-      manifestLoader: ManifestLoader(manifestResources: toolchain.manifestResources, cacheDir: buildPath),
+      manifestLoader: ManifestLoader(manifestResources: manifestToolchain.manifestResources, cacheDir: buildPath),
       delegate: BuildSettingProviderWorkspaceDelegate(),
       fileSystem: fileSystem,
       skipUpdate: true)
-
-    let triple = Triple.hostTriple
 
     let swiftPMConfiguration: PackageModel.BuildConfiguration
     switch buildSetup.configuration {
@@ -98,9 +99,10 @@ public final class SwiftPMWorkspace {
     }
 
     self.buildParameters = BuildParameters(
-      dataPath: buildPath.appending(component: triple.tripleString),
+      dataPath: buildPath.appending(component: targetDestination.target.tripleString),
       configuration: swiftPMConfiguration,
-      toolchain: toolchain,
+      toolchain: targetToolchain,
+      destinationTriple: targetDestination.target,
       flags: buildSetup.flags)
 
     self.packageGraph = PackageGraph(rootPackages: [], requiredDependencies: [])
