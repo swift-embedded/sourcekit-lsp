@@ -18,6 +18,7 @@ import LSPLogging
 import SKCore
 import SKSupport
 import SourceKit
+import Workspace
 import sourcekitd // Not needed here, but fixes debugging...
 import TSCBasic
 import TSCLibc
@@ -44,6 +45,7 @@ func parseArguments() throws -> CommandLineOptions {
   let syncOption = parser.add(option: "--sync", kind: Bool.self) // For testing.
   let buildConfigurationOption = parser.add(option: "--configuration", shortName: "-c", kind: BuildConfiguration.self, usage: "Build with configuration (debug|release) [default: debug]")
   let buildPathOption = parser.add(option: "--build-path", kind: PathArgument.self, usage: "Specify build/cache directory")
+  let destinationOption = parser.add(option: "--destination", kind: PathArgument.self)
   let buildFlagsCc = parser.add(option: "-Xcc", kind: [String].self, strategy: .oneByOne, usage: "Pass flag through to all C compiler invocations")
   let buildFlagsCxx = parser.add(option: "-Xcxx", kind: [String].self, strategy: .oneByOne, usage: "Pass flag through to all C++ compiler invocations")
   let buildFlagsLinker = parser.add(option: "-Xlinker", kind: [String].self, strategy: .oneByOne, usage: "Pass flag through to all linker invocations")
@@ -73,6 +75,9 @@ func parseArguments() throws -> CommandLineOptions {
   }
   if let flags = parsedArguments.get(buildFlagsSwift) {
     result.serverOptions.buildSetup.flags.swiftCompilerFlags = flags
+  }
+  try parsedArguments.get(destinationOption).map {
+    result.serverOptions.buildSetup.customDestination = try Destination(fromFile: $0.path)
   }
 
   if let options = parsedArguments.get(clangdOptions) {

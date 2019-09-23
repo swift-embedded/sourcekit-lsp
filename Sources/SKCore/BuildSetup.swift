@@ -13,6 +13,7 @@
 import TSCBasic
 import TSCUtility
 import SKSupport
+import Workspace
 
 /// Build configuration
 public struct BuildSetup {
@@ -31,9 +32,13 @@ public struct BuildSetup {
   /// Additional build flags
   public var flags: BuildFlags
 
-  public init(configuration: BuildConfiguration, path: AbsolutePath?, flags: BuildFlags) {
+  /// Custom compilation destination, if different from host
+  public var customDestination: Destination?
+
+  public init(configuration: BuildConfiguration, path: AbsolutePath?, flags: BuildFlags, customDestination: Destination? = nil) {
     self.configuration = configuration
     self.path = path
     self.flags = flags
+    self.customDestination = customDestination
   }
 }
