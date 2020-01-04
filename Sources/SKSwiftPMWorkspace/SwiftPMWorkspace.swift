@@ -73,12 +73,14 @@ public final class SwiftPMWorkspace {
         throw Error.cannotDetermineHostToolchain
     }
 
+    let buildPath: AbsolutePath = buildSetup.path ?? packageRoot.appending(component: ".build")
+
     let hostDestination = try Destination.hostDestination(destinationToolchainBinDir)
     let manifestToolchain = try UserToolchain(destination: hostDestination)
-    let targetDestination = buildSetup.customDestination ?? hostDestination
+    let buildDestination = try? Destination(fromFile: buildPath.appending(component: "destination.json"),
+                                            fileSystem: fileSystem)
+    let targetDestination = buildSetup.customDestination ?? buildDestination ?? hostDestination
     let targetToolchain = try UserToolchain(destination: targetDestination)
-
-    let buildPath: AbsolutePath = buildSetup.path ?? packageRoot.appending(component: ".build")
 
 
     self.workspace = Workspace(
