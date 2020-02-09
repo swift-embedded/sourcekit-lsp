@@ -146,8 +146,12 @@ extension Toolchain {
     let dylibExt = Platform.currentPlatform?.dynamicLibraryExtension ?? "so"
 
     let sourcekitdPath = libPath.appending(components: "sourcekitd.framework", "sourcekitd")
+    let sourcekitdInProcPath = libPath.appending(components: "sourcekitdInProc.framework", "sourcekitdInProc")
     if fs.isFile(sourcekitdPath) {
       self.sourcekitd = sourcekitdPath
+      foundAny = true
+    } else if fs.isFile(sourcekitdInProcPath) {
+      self.sourcekitd = sourcekitdInProcPath
       foundAny = true
     } else {
       let sourcekitdPath = libPath.appending(component: "libsourcekitdInProc.\(dylibExt)")
